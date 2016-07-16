@@ -1,14 +1,14 @@
 $(function() {
   var AI = {
-    chooseMove: function(n, board) {
-      for(var i = 0; i<n; i++) {
-        for(var j = 0; j<n; j++) {
-          if(board[i][j]==0) {
-            return {x:i, y:j};
-          }
-        }
+    initAI: function(aiType) {
+      AI.aiType = aiType;
+    },
+    notifyWorker: function(n, board, cb) {
+      worker = new Worker("ai_worker.js");
+      worker.onmessage = function(e) {
+        cb(e.data.x, e.data.y);
       }
-      return {x:1,y:1};
+      worker.postMessage({n: n, board: board, aiType: AI.aiType});
     }
   };
   var Game = {
@@ -56,18 +56,16 @@ $(function() {
           }
         } else {
           if(Game.currentPlayer == 2) {
-            // TODO: make run in a worker
-            var move = AI.chooseMove(Game.n, Game.board);
-            Game.moveRequest(move.x, move.y, 2);
+            AI.notifyWorker(Game.n, Game.board, (x, y) => Game.moveRequest(x, y, 2));
           }
         }
       }
     },
     humanMoveRequest: function(a, b) {
-      /*if(Game.currentPlayer==1) {
+      if(Game.currentPlayer==1) {
         Game.moveRequest(a,b,1);
-      }*/
-      Game.moveRequest(a,b,Game.currentPlayer);
+      }
+      //Game.moveRequest(a,b,Game.currentPlayer);
     },
     checkFinish: function() {
       var dfs = function(x, y, player, visited, finished) {
@@ -197,7 +195,9 @@ $(function() {
   $("#startButton").click(function() {
     var size = $("#size").val();
     var whoStarts = $("#whoStarts").val();
+    var aiType = $("#aiType").val();
     Board.initBoard($("#hex-board"), size);
+    AI.initAI(aiType);
     Game.initGame(size, whoStarts, $("#infoBox"));
   });
 });

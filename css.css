@@ -6,7 +6,7 @@ div#menu {
   left: 850px;
   top: 20px;
   width: 250px;
-  height: 150px;
+  height: 190px;
   border: #080 solid 2px;
   background-color: #8f8;
 }
@@ -16,7 +16,7 @@ div#menu * {
 div#infoBox {
   position: absolute;
   left: 850px;
-  top: 200px;
+  top: 240px;
   width: 230px;
   height: 50px;
   padding: 10px;
