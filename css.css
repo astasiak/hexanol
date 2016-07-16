@@ -1,3 +1,34 @@
 canvas#hex-board {
   border: black solid 2px;
 }
+div#menu {
+  position: absolute;
+  left: 850px;
+  top: 20px;
+  width: 250px;
+  height: 150px;
+  border: #080 solid 2px;
+  background-color: #8f8;
+}
+div#menu * {
+  margin: 8px;
+}
+div#infoBox {
+  position: absolute;
+  left: 850px;
+  top: 200px;
+  width: 230px;
+  height: 50px;
+  padding: 10px;
+  border: #444 solid 2px;
+  background-color: #bbb;
+}
+div#infoBox.computer {
+  border: #00f solid 2px;
+  background-color: #99f;
+}
+div#infoBox.human {
+  border: #f00 solid 2px;
+  background-color: #f99;
+}
+

@@ -8,7 +8,20 @@
     <link rel="stylesheet" type="text/css" href="css.css"/>
   </head>
   <body>
-    <canvas id="hex-board" width="800" height="500"></canvas>
+    <div id="board-box">
+      <canvas id="hex-board" width="800" height="500"></canvas>
+    </div>
+    <div id="menu">
+       <input id="size" type="number" min="2" max="15"><br>
+       <select id="whoStarts">
+         <option value="1">Human starts</option>
+         <option value="2">Computer starts</option>
+       </select><br>
+       <button type="button" id="startButton">Start game!</button>
+    </div>
+    <div id="infoBox">
+      Hello
+    </div>
   </body>
 </html>
 

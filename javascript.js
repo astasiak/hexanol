@@ -1,6 +1,19 @@
 $(function() {
+  var AI = {
+    chooseMove: function(n, board) {
+      for(var i = 0; i<n; i++) {
+        for(var j = 0; j<n; j++) {
+          if(board[i][j]==0) {
+            return {x:i, y:j};
+          }
+        }
+      }
+      return {x:1,y:1};
+    }
+  };
   var Game = {
-    initGame: function (n) {
+    initGame: function (n, whoStarts, infoBox) {
+      Game.infoBox = infoBox;
       Game.n = n;
       Game.board = new Array(n);
       for (var i = 0; i < n; i++) {
@@ -9,11 +22,96 @@ $(function() {
           Game.board[i][j] = 0;
         }
       }
+      Game.setCurrentPlayer(whoStarts);
       Board.drawBoard(Game.board);
     },
-    moveRequest: function(a, b) {
-      Game.board[a][b] = (Game.board[a][b]+1)%3;
-      Board.drawBoard(Game.board);
+    setInfoBox: function(text, cssClass) {
+      Game.infoBox.removeClass();
+      if(cssClass) {
+        Game.infoBox.addClass(cssClass);
+      }
+      Game.infoBox.text(text);
+    },
+    setCurrentPlayer: function(whoPlays) {
+      Game.currentPlayer = whoPlays;
+      if(whoPlays==1) {
+        Game.setInfoBox("Human plays", "human");
+      }
+      if(whoPlays==2) {
+        Game.setInfoBox("Computer plays", "computer");
+      }
+    },
+    moveRequest: function(a, b, player) {
+      if(Game.board[a][b]==0 && Game.currentPlayer == player) {
+        Game.board[a][b] = player;
+        Game.setCurrentPlayer([0,2,1][player]);
+        var gameResult = Game.checkFinish();
+        Board.drawBoard(Game.board);
+        if (gameResult>0) {
+          Game.currentPlayer = 0;
+          if (gameResult==1) {
+            Game.setInfoBox("Human won", "human");
+          } else if(gameResult==2) {
+            Game.setInfoBox("Computer won", "computer");
+          }
+        } else {
+          if(Game.currentPlayer == 2) {
+            // TODO: make run in a worker
+            var move = AI.chooseMove(Game.n, Game.board);
+            Game.moveRequest(move.x, move.y, 2);
+          }
+        }
+      }
+    },
+    humanMoveRequest: function(a, b) {
+      /*if(Game.currentPlayer==1) {
+        Game.moveRequest(a,b,1);
+      }*/
+      Game.moveRequest(a,b,Game.currentPlayer);
+    },
+    checkFinish: function() {
+      var dfs = function(x, y, player, visited, finished) {
+        var fieldId = x+","+y;
+        if(visited.has(fieldId)) {
+          return false;
+        }
+        visited.add(fieldId);
+        if(Game.board[x][y]==player) {
+          if(finished(x,y)) {
+            return true;
+          }
+          for (var i=-1;i<=1;i++) {
+            for (var j=-1;j<=1;j++) {
+              if(i+j>-2 && i+j<2) {
+                var xx = x+i;
+                var yy = y+j;
+                if (xx>=0 && xx<Game.n && yy>=0 && yy<Game.n) {
+                  var won = dfs(xx, yy, player, visited, finished);
+                  if (won) {
+                    return true;
+                  }
+                }
+              }
+            }
+          }
+        }
+        return false;
+      }
+      var visited1 = new Set();
+      var isFinished1 = function(x,y) { return y==Game.n-1; };
+      for (var i = 0; i < Game.n; i++ ) {
+        if(dfs(i,0,1,visited1, isFinished1)) {
+          return 1;
+        }
+      }
+      var visited2 = new Set();
+      var isFinished2 = function(x,y) { return x==Game.n-1; };
+      for (var i = 0; i < Game.n; i++ ) {
+        if(dfs(0,i,2,visited2, isFinished2)) {
+          return 2;
+        }
+      }
+      return 0;
     }
   }
 
@@ -21,8 +119,10 @@ $(function() {
     between: 2,
     margin: 30,
     initBoard: function (canvas, n) {
+      n = Number(n);
       Board.n = n;
       Board.canvas = canvas;
+      Board.canvas.removeLayers().drawLayers();
       var boxHeight = (Board.canvas.height() - 2*Board.margin)/(0.75*n+0.25);
       var boxWidth = (Board.canvas.width() - 2*Board.margin)/(1.5*n-0.5);
       var widthBaseSize = boxWidth*2/Math.sqrt(3);
@@ -39,6 +139,13 @@ $(function() {
           x: Board.margin+(a+0.5+b*0.5)*boxWidth + off.x,
           y: Board.margin+(0.75*b+0.5)*boxHeight + off.y
         };
+        if(a==="5") {
+          console.log(a);
+          console.log(a+0.5);
+          console.log(a+0.5+b*0.5);
+          console.log((a+0.5+b*0.5)*boxWidth);
+          console.log(Board.margin+(a+0.5+b*0.5)*boxWidth);
+        }
         Board.canvas.drawPolygon({
           layer: true,
           x: center.x, y: center.y,
@@ -67,7 +174,7 @@ $(function() {
           sides: 6,
           rotate: 30,
           fillStyle: '#666',
-          click: () => Game.moveRequest(a,b)
+          click: () => Game.humanMoveRequest(a,b)
         });
       };
       for (i = 0; i < Board.n; i++) {
@@ -87,7 +194,10 @@ $(function() {
     }
   }
 
-  var size = 10;
-  Board.initBoard($("#hex-board"), size);
-  Game.initGame(size);
+  $("#startButton").click(function() {
+    var size = $("#size").val();
+    var whoStarts = $("#whoStarts").val();
+    Board.initBoard($("#hex-board"), size);
+    Game.initGame(size, whoStarts, $("#infoBox"));
+  });
 });
