@@ -12,7 +12,7 @@
       <canvas id="hex-board" width="800" height="500"></canvas>
     </div>
     <div id="menu">
-       <input id="size" type="number" min="2" max="15"><br>
+       <input id="size" type="number" min="2" max="15" placeholder="Board size" value="9"><br>
        <select id="whoStarts">
          <option value="1">Human starts</option>
          <option value="2">Computer starts</option>
@@ -20,6 +20,7 @@
        <select id="aiType">
          <option value="first">AI: First move</option>
          <option value="random">AI: Random move</option>
+         <option value="monteCarlo">AI: Monte Carlo</option>
        </select><br>
        <button type="button" id="startButton">Start game!</button>
     </div>

@@ -65,7 +65,6 @@ $(function() {
       if(Game.currentPlayer==1) {
         Game.moveRequest(a,b,1);
       }
-      //Game.moveRequest(a,b,Game.currentPlayer);
     },
     checkFinish: function() {
       var dfs = function(x, y, player, visited, finished) {
